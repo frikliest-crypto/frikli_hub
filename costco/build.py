@@ -1,11 +1,12 @@
-"""이번 주 추천을 골라 costco/index.html 정적 페이지로 만든다.
+"""costco/picks.json(이번 주 추천)으로 costco/index.html 정적 페이지를 만든다.
 
-  python build.py --sample   샘플 데이터로 페이지만 생성 (API 키 불필요)
-  python build.py            Claude로 아이템을 골라 페이지 생성
+  python build.py --sample   sample_items.json으로 페이지만 생성 (레이아웃 확인용)
+  python build.py            picks.json으로 페이지 생성
+
+picks.json은 [{name, category, why, price_note, source_url}, ...] 형식이다.
 """
 import argparse
 import json
-import os
 from datetime import date
 from html import escape
 from pathlib import Path
@@ -59,12 +60,8 @@ def main() -> None:
     parser.add_argument("--sample", action="store_true")
     args = parser.parse_args()
 
-    if args.sample:
-        items = json.loads((HERE / "sample_items.json").read_text(encoding="utf-8"))
-    else:
-        from picker import pick_items
-
-        items = pick_items(market=os.environ.get("COSTCO_MARKET", "한국"))
+    source = "sample_items.json" if args.sample else "picks.json"
+    items = json.loads((HERE / source).read_text(encoding="utf-8"))
 
     (HERE / "index.html").write_text(render(items, args.sample), encoding="utf-8")
     print(f"index.html 생성 ({len(items)}개)")
